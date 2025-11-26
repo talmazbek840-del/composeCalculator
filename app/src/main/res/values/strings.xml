@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">composeCalculator</string>
+
+    <string-array name="firstRow">
+        <item>AC</item>
+        <item>( )</item>
+        <item>%</item>
+        <item>÷</item>
+    </string-array>
+
+    <string-array name="secondRow">
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>×</item> <!-- \u00D7 -->
+    </string-array>
+
+    <string-array name="thirdRow">
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>−</item>
+    </string-array>
+
+    <string-array name="fourthRow">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>+</item>
+    </string-array>
+
+    <string-array name="fifthRow">
+        <item>0</item>
+        <item>.</item>
+        <item>⌫</item>
+        <item>=</item>
+    </string-array>
+
+    <string name="errorInput">Ошибка ввода данных</string>
+</resources>
