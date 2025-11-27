@@ -1,30 +1,28 @@
-package temirlan.com.calculator.ui.theme
+package temirlan.com.calculator
 
-import temirlan.com.calculator.bracketsOpen
-import temirlan.com.calculator.evaluateRPN
-import temirlan.com.calculator.infixToRPN
+import kotlin.math.abs
 
 fun buttonClick(btnTxt: String, calculateTxt: String): String {
-    when (btnTxt) {
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> return inputDigit(
+    return when (btnTxt) {
+        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> inputDigit(
             calculateTxt,
             btnTxt.toInt()
         )
 
-        "." -> return inputDot(calculateTxt)
-        "+", "-", "×", "÷", "%" -> return addOperation(btnTxt, calculateTxt)
-        "⌫" -> return deleteOperation(calculateTxt)
-        "()" -> return addBrackets(calculateTxt)
-        else -> return calculateTxt
+        "." -> inputDot(calculateTxt)
+        "+", "-", "×", "÷", "%" -> addOperation(btnTxt, calculateTxt)
+        "⌫" -> deleteOperation(calculateTxt)
+        "()" -> addBrackets(calculateTxt)
+        else -> calculateTxt
     }
 }
 
 private fun inputDigit(str: String, digit: Int): String {
-    if (str.isNotEmpty() && str.last() == ')') {
-        return str + "×$digit"
+    return if (str.isNotEmpty() && str.last() == ')') {
+        "$str×$digit"
 
     } else {
-        return str + "$digit"
+        str + "$digit"
     }
 }
 
@@ -34,7 +32,7 @@ private fun inputDot(calculateTxt: String): String {
     return if (calculateTxt != "" && calculateTxt.last() != '.' && calculateTxt.last()
             .isDigit() && !lastPart.contains(".")
     ) {
-        calculateTxt + "."
+        "$calculateTxt."
     } else calculateTxt
 }
 
@@ -50,13 +48,13 @@ private fun addBrackets(calculateTxt: String): String {
 
         calculateTxt.isEmpty() || (isOperation(calculateTxt.last()) && !bracketsOpen && calculateTxt.last() != '(') -> {
             bracketsOpen = true
-            return calculateTxt + "("
+            return "$calculateTxt("
 
         }
 
         (calculateTxt.last().isDigit() || calculateTxt.last() == ')') && !bracketsOpen -> {
             bracketsOpen = true
-            return calculateTxt + "×("
+            return "$calculateTxt×("
 
         }
 
@@ -67,7 +65,7 @@ private fun addBrackets(calculateTxt: String): String {
 
         calculateTxt.last().isDigit() && bracketsOpen && canCloseBracket(calculateTxt) -> {
             bracketsOpen = false
-            return calculateTxt + ")"
+            return "$calculateTxt)"
 
         }
 
@@ -106,16 +104,16 @@ private fun deleteOperation(calculateTxt: String): String {
 }
 
 fun inputEqual(calculateTxt: String): String {
-    try {
+    return try {
         val str = calculateTxt
         val rpn = infixToRPN(str)
         val result = evaluateRPN(rpn)
-        if (kotlin.math.abs(result % 1.0) == 0.0) {
-            return result.toInt().toString()
+        if (abs(result % 1.0) == 0.0) {
+            result.toInt().toString()
         } else {
-            return result.toString()
+            result.toString()
         }
     } catch (e: Exception) {
-        return "Error"
+        "Error"
     }
 }
