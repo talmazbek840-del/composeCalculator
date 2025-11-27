@@ -1,5 +1,6 @@
 package temirlan.com.calculator
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,13 +12,16 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -79,11 +84,11 @@ fun CalculateScreen() {
         ) {
             CalculatorIO(
                 calculateTxt, onValueChange = { calculateTxt = it },
-                Modifier.weight(1f), colors = listOf(MainTheme.colors.BtnMainBackgroundColor,MainTheme.colors.BtnMainTextColor)
+                Modifier.weight(1f), colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
             CalculatorIO(
                 outputTxt, onValueChange = { outputTxt = it },
-                Modifier.weight(1f), colors = listOf(MainTheme.colors.BtnMainBackgroundColor,MainTheme.colors.BtnMainTextColor)
+                Modifier.weight(1f), colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
 
         }
@@ -94,7 +99,7 @@ fun CalculateScreen() {
                 Row(
                     modifier = Modifier
                         .padding(2.dp)
-                        .weight(1f),
+                        .weight(1f).fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     it.forEach {
@@ -128,7 +133,7 @@ fun CalculatorButton(
         Text(
             text = label,
             modifier = Modifier.padding(2.dp),
-            fontSize = if (label == "AC") 31.sp else 40.sp,
+            fontSize = if (label == "AC") 25.sp else 40.sp,
             color = changeColor(label)[1]
         )
     }
@@ -156,49 +161,49 @@ fun CalculatorIO(
             )
         }
     }
-
-    TextField(
-        value = value,
-        onValueChange = { newValue ->
-            onValueChange(newValue)
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 60.dp, max = 150.dp)
-            .verticalScroll(scrollState),
-        textStyle = TextStyle(
-            fontSize = 50.sp,
-            color = Color(0xFF343434),
-            textAlign = TextAlign.End
-        ),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = colors[0],
-            unfocusedContainerColor = colors[0],
-            disabledContainerColor = colors[0],
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            focusedTextColor = colors[1],
-            unfocusedTextColor = colors[1]
-
-        ),
-        placeholder = {
-            Text(
-                text = "0",
+    CompositionLocalProvider(LocalContentColor provides colors[1].copy(alpha = 1f)) {
+        TextField(
+            value = value,
+            onValueChange = { newValue ->
+                onValueChange(newValue)
+            },
+            modifier = modifier
+                .fillMaxWidth()
+                .heightIn(min = 60.dp, max = 150.dp)
+                .verticalScroll(scrollState),
+            textStyle = TextStyle(
                 fontSize = 50.sp,
-                color = Color.Gray.copy(alpha = 0.3f),
-                textAlign = TextAlign.End,
-                modifier = Modifier.fillMaxWidth()
-            )
-        },
-        singleLine = false,
-        maxLines = Int.MAX_VALUE,
-        readOnly = true // Только программный ввод через кнопки
-    )
+                color = colors[1],
+                textAlign = TextAlign.End
+            ),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),  // Нет клавиатуры
+            enabled = true,
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = colors[0],
+                unfocusedContainerColor = colors[0],
+                disabledContainerColor = colors[0],
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                disabledIndicatorColor = Color.Transparent
+
+            ),
+            placeholder = {
+                Text(
+                    text = "0",
+                    fontSize = 50.sp,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            },
+            singleLine = false,
+            maxLines = Int.MAX_VALUE
+
+        )
+    }
 }
 
 
-@Preview(name = "Phone", device = "id:pixel_4")
+@Preview(name = "Phone", uiMode = Configuration.UI_MODE_NIGHT_YES, device = "id:pixel_4")
 @Composable
 fun GreetingPreview() {
     MainTheme {
