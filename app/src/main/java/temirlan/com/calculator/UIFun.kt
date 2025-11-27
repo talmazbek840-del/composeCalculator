@@ -1,4 +1,4 @@
-package temirlan.com.calculator.ui.theme
+package temirlan.com.calculator
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import temirlan.com.calculator.bracketsOpen
+import temirlan.com.calculator.ui.theme.MainTheme
 
 private val nameButton = listOf(
     listOf("AC", "()", "%", "÷"),
@@ -41,7 +41,7 @@ private val nameButton = listOf(
     listOf("1", "2", "3", "+"),
     listOf("0", ".", "⌫", "="))
 @Composable
-fun CalculateScreen(name: String, modifier: Modifier = Modifier) {
+fun CalculateScreen() {
     var calculateTxt by remember { mutableStateOf("") }
     var outputTxt by remember { mutableStateOf("") }
     val ioModifier =
@@ -49,9 +49,10 @@ fun CalculateScreen(name: String, modifier: Modifier = Modifier) {
             .padding(2.dp, 10.dp)
             .fillMaxWidth()
             .background(MainTheme.colors.BackgroundColor)
-    val mainModifier = Modifier.background(MainTheme.colors.BackgroundColor)
+    val mainModifier = Modifier.Companion.background(
+        MainTheme.colors.BackgroundColor)
     val btnColumnModifier =
-        Modifier
+        Modifier.Companion
             .background(MainTheme.colors.BackgroundColor)
             .padding(bottom = 10.dp)
     val calcBtnModifier = Modifier
@@ -76,20 +77,20 @@ fun CalculateScreen(name: String, modifier: Modifier = Modifier) {
         Column(
             modifier = ioModifier.weight(4f)
         ) {
-            CalculatorInput(
+            CalculatorIO(
                 calculateTxt, onValueChange = { calculateTxt = it },
-                Modifier.weight(1f), color = MainTheme.colors.BackgroundColor
+                Modifier.weight(1f), colors = listOf(MainTheme.colors.BtnMainBackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
-            CalculatorInput(
+            CalculatorIO(
                 outputTxt, onValueChange = { outputTxt = it },
-                Modifier.weight(1f), color = MainTheme.colors.BackgroundColor
+                Modifier.weight(1f), colors = listOf(MainTheme.colors.BtnMainBackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
 
         }
         Column(
             modifier = btnColumnModifier.weight(6f)
         ) {
-            nameButton.forEach {
+            nameButton.forEach { it ->
                 Row(
                     modifier = Modifier
                         .padding(2.dp)
@@ -133,35 +134,12 @@ fun CalculatorButton(
     }
 }
 
-
 @Composable
-fun CalculatorOutput(
+fun CalculatorIO(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    color: Color
-) {
-    TextField(
-        textStyle = TextStyle(fontSize = 20.sp),
-        value = value,
-        onValueChange = { value },
-        modifier = Modifier,
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MainTheme.colors.BackgroundColor,
-            unfocusedContainerColor = MainTheme.colors.BackgroundColor,
-            focusedTextColor = MainTheme.colors.BtnMainTextColor,
-            unfocusedTextColor = MainTheme.colors.BtnMainTextColor
-        )
-    )
-
-}
-
-@Composable
-fun CalculatorInput(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    color: Color
+    colors:List <Color>
 ) {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
@@ -194,12 +172,14 @@ fun CalculatorInput(
             textAlign = TextAlign.End
         ),
         colors = TextFieldDefaults.colors(
-            focusedContainerColor = color,
-            unfocusedContainerColor = color,
-            disabledContainerColor = color,
+            focusedContainerColor = colors[0],
+            unfocusedContainerColor = colors[0],
+            disabledContainerColor = colors[0],
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
+            focusedTextColor = colors[1],
+            unfocusedTextColor = colors[1]
 
         ),
         placeholder = {
@@ -222,7 +202,7 @@ fun CalculatorInput(
 @Composable
 fun GreetingPreview() {
     MainTheme {
-        CalculateScreen("Android")
+        CalculateScreen()
     }
 }
 
