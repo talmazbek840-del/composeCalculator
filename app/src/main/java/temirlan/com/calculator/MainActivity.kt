@@ -38,7 +38,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
-import temirlan.com.calculator.ui.theme.CalculateScreen
 import temirlan.com.calculator.ui.theme.MainTheme
 
 
@@ -51,10 +50,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MainTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    CalculateScreen(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    CalculateScreen()
                 }
             }
         }
