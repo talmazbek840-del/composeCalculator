@@ -172,7 +172,7 @@ fun CalculatorIO(
             textStyle = TextStyle(
                 fontSize = 50.sp,
                 color = colors[1],
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.End
             ),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),  // Нет клавиатуры
             enabled = true,
