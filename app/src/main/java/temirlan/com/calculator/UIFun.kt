@@ -90,7 +90,6 @@ fun CalculateScreen() {
                 outputTxt, onValueChange = { outputTxt = it },
                 Modifier.weight(1f), colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
-
         }
         Column(
             modifier = btnColumnModifier.weight(6f)
@@ -111,7 +110,6 @@ fun CalculateScreen() {
                     }
                 }
             }
-
         }
     }
 }
@@ -174,7 +172,7 @@ fun CalculatorIO(
             textStyle = TextStyle(
                 fontSize = 50.sp,
                 color = colors[1],
-                textAlign = TextAlign.End
+                textAlign = TextAlign.Center
             ),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),  // Нет клавиатуры
             enabled = true,
@@ -182,9 +180,7 @@ fun CalculatorIO(
                 focusedContainerColor = colors[0],
                 unfocusedContainerColor = colors[0],
                 disabledContainerColor = colors[0],
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+
 
             ),
             placeholder = {
