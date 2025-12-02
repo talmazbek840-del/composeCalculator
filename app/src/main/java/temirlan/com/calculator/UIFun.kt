@@ -1,8 +1,9 @@
 package temirlan.com.calculator
-
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,8 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -23,116 +22,379 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import temirlan.com.calculator.ui.theme.MainTheme
 
-private val nameButton = listOf(
-    listOf("AC", "()", "%", "÷"),
-    listOf("7", "8", "9", "\u00D7"),
-    listOf("4", "5", "6", "-"),
-    listOf("1", "2", "3", "+"),
-    listOf("0", ".", "⌫", "="))
 @Composable
 fun CalculateScreen() {
-    var calculateTxt by remember { mutableStateOf("") }
-    var outputTxt by remember { mutableStateOf("") }
-    val ioModifier =
-        Modifier
-            .padding(2.dp, 10.dp)
-            .fillMaxWidth()
-            .background(MainTheme.colors.BackgroundColor)
-    val mainModifier = Modifier.Companion.background(
-        MainTheme.colors.BackgroundColor)
-    val btnColumnModifier =
-        Modifier.Companion
-            .background(MainTheme.colors.BackgroundColor)
-            .padding(bottom = 10.dp)
-    val calcBtnModifier = Modifier
-        .padding(2.dp)
-        .fillMaxHeight(1f)
-        .aspectRatio(1f)
 
-    val handleButtonClick: (String) -> Unit = { buttonLabel ->
-        when (buttonLabel) {
-            "=" -> outputTxt = inputEqual(calculateTxt)
-            "AC" -> {
-                outputTxt = ""
-                bracketsOpen = false
-                calculateTxt = ""
-            }
+    val viewModel: CalculateViewModel = viewModel()
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-            else -> calculateTxt = buttonClick(buttonLabel, calculateTxt)
-        }
-    }
-
-    Column(modifier = mainModifier) {
+    Column(modifier = Modifier.background(
+        MainTheme.colors.BackgroundColor)) {
         Column(
-            modifier = ioModifier.weight(4f)
+            modifier = Modifier
+                .padding(2.dp, 10.dp)
+                .fillMaxWidth()
+                .background(MainTheme.colors.BackgroundColor)
+                .weight(4f)
         ) {
             CalculatorIO(
-                calculateTxt, onValueChange = { calculateTxt = it },
-                Modifier.weight(1f), colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
+                viewModel.stateInput, onValueChange = { viewModel.stateInput = it },
+                Modifier.weight(1f),
+                colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
             )
             CalculatorIO(
-                outputTxt, onValueChange = { outputTxt = it },
-                Modifier.weight(1f), colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
+                viewModel.stateOutput, onValueChange = { viewModel.stateOutput = it },
+                Modifier.weight(1f),
+                colors = listOf(MainTheme.colors.BackgroundColor, MainTheme.colors.BtnMainTextColor)
             )
         }
         Column(
-            modifier = btnColumnModifier.weight(6f)
+            modifier = Modifier
+                .background(MainTheme.colors.BackgroundColor)
+                .padding(bottom = 10.dp).weight(6f)
         ) {
-            nameButton.forEach { it ->
-                Row(
+            Row(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                CalculatorButton(
+                    label = stringResource(R.string.buttonAc),
+                    isLandScape = isLandscape,
                     modifier = Modifier
                         .padding(2.dp)
-                        .weight(1f).fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }.weight(1f)
                 ) {
-                    it.forEach {
-                        CalculatorButton(
-                            label = it,
-                            onClick = { handleButtonClick(it) },
-                            modifier = calcBtnModifier
-                        )
+                    viewModel.onAction(CalculateAction.AC)
+                }
+                CalculatorButton(
+                isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonBrackets),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                        if (isLandscape) it else it.aspectRatio(1f) }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Brackets)
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonPercent),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                        if (isLandscape) it else it.aspectRatio(1f)
                     }
+                    .weight(1f)
+            ){
+                    viewModel.onAction(CalculateAction.Operation(operation = CalculateOperation.Percent))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonDivide),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                        if (isLandscape) it else it.aspectRatio(1f)
+                    }
+                    .weight(1f)
+            ){
+                    viewModel.onAction(CalculateAction.Operation(CalculateOperation.Divide))
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button7),
+                    modifier = Modifier
+                            .padding(2.dp)
+                            .fillMaxHeight()
+                            .let {
+                                if (isLandscape) it else it.aspectRatio(1f)
+                            }.weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(7))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button8),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(8))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button9),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else {it.aspectRatio(1f)}
+                        }.weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(9))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonMultiply),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Operation(CalculateOperation.Multiply))
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button4),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(4))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button5),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(5))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button6),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(6))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonMinus),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Operation(CalculateOperation.Minus))
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button1),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(1))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button2),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(2))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button3),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(3))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonPlus),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Operation(CalculateOperation.Plus))
+                }
+            }
+            Row(
+                modifier = Modifier
+                    .padding(2.dp)
+                    .weight(1f).fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.button0),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.InputNumber(0))
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonDot),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Dot)
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonBackspace),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it else it.aspectRatio(1f)
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Delete)
+                }
+                CalculatorButton(
+                    isLandScape = isLandscape,
+                    label = stringResource(R.string.buttonEquals),
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .fillMaxHeight()
+                        .let {
+                            if (isLandscape) it
+                            else {
+                                it.aspectRatio(1f)
+
+                            }
+                        }
+                        .weight(1f)
+                ){
+                    viewModel.onAction(CalculateAction.Equal)
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun CalculatorButton(
     label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    isLandScape: Boolean,
+    modifier: Modifier ,
+            onClick: () -> Unit
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        shape = CircleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = changeColor(label)[0]
-        )
+    Box(
+        modifier = modifier.fillMaxHeight()
+            .clickable { onClick() }
+            .clip(CircleShape)
+            .background ( changeColor(label)[0]),
+        contentAlignment = Alignment.Center
+
     ) {
         Text(
             text = label,
             modifier = Modifier.padding(2.dp),
-            fontSize = if (label == "AC") 25.sp else 40.sp,
-            color = changeColor(label)[1]
+            color = changeColor(label)[1],
+            style = if (isLandScape) MainTheme.typography.labelSmall
+                    else MainTheme.typography.labelLarge
         )
     }
 }
@@ -159,53 +421,45 @@ fun CalculatorIO(
             )
         }
     }
+
     CompositionLocalProvider(LocalContentColor provides colors[1].copy(alpha = 1f)) {
         TextField(
             value = value,
-            onValueChange = { newValue ->
-                onValueChange(newValue)
+            onValueChange = { value ->
+                onValueChange(value)
             },
             modifier = modifier
                 .fillMaxWidth()
                 .heightIn(min = 60.dp, max = 150.dp)
                 .verticalScroll(scrollState),
-            textStyle = TextStyle(
-                fontSize = 50.sp,
-                color = colors[1],
-                textAlign = TextAlign.End
-            ),
+            textStyle = MainTheme.typography.displayMedium,
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),  // Нет клавиатуры
             enabled = true,
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = colors[0],
                 unfocusedContainerColor = colors[0],
-                disabledContainerColor = colors[0],
-
-
+                unfocusedTextColor = colors[1]
             ),
             placeholder = {
                 Text(
                     text = "0",
-                    fontSize = 50.sp,
-                    textAlign = TextAlign.End,
+                    style = MainTheme.typography.displayMedium,
                     modifier = Modifier.fillMaxWidth()
                 )
             },
             singleLine = false,
             maxLines = Int.MAX_VALUE
-
         )
     }
 }
 
-
-@Preview(name = "Phone", uiMode = Configuration.UI_MODE_NIGHT_YES, device = "id:pixel_4")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES,device = Devices.PIXEL_4, showSystemUi = true)
 @Composable
 fun GreetingPreview() {
     MainTheme {
         CalculateScreen()
     }
 }
+
 
 @Composable
 fun changeColor(btnText: String): List<Color> {
@@ -214,21 +468,17 @@ fun changeColor(btnText: String): List<Color> {
             MainTheme.colors.BtnACBackgroundColor,
             MainTheme.colors.BtnACTextColor
         )
-
         "=" -> return listOf(
             MainTheme.colors.BtnEqualBackgroundColor,
             MainTheme.colors.BtnEqualTextColor
         )
-
-        "()", "%", "÷", "\u00D7", "-", "+" -> return listOf(
+        "()", "%", "÷", "×", "-", "+" -> return listOf(
             MainTheme.colors.BtnSymbolBackgroundColor,
             MainTheme.colors.BtnSymbolTextColor
         )
-
         else -> return listOf(
             MainTheme.colors.BtnMainBackgroundColor,
             MainTheme.colors.BtnMainTextColor
         )
-
     }
 }

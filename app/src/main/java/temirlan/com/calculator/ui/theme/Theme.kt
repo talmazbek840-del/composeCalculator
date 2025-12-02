@@ -10,6 +10,7 @@ private val DarkColorScheme = CustomColorPalette(
     black3,
     white3,
     black2,
+    white3,
     white2,
     gray4,
     gray6,
@@ -21,6 +22,7 @@ private val LightColorScheme = CustomColorPalette(
     white3,
     gray1,
     white2,
+    gray1,
     gray5,
     white4,
     white3,
@@ -46,7 +48,9 @@ fun MainTheme(
     )
 }
 object MainTheme {
+    val typography = CalculatorTypography
     val colors: CustomColorPalette
         @Composable @ReadOnlyComposable
         get() = LocalColors.current
+
 }
