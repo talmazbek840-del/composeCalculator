@@ -1,40 +1,31 @@
 <resources>
     <string name="app_name">composeCalculator</string>
 
-    <string-array name="firstRow">
-        <item>AC</item>
-        <item>( )</item>
-        <item>%</item>
-        <item>÷</item>
-    </string-array>
 
-    <string-array name="secondRow">
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>×</item> <!-- \u00D7 -->
-    </string-array>
+    <string name="buttonAc">AC</string>
+    <string name="buttonBrackets">( )</string>
+    <string name="buttonPercent">%</string>
+    <string name="buttonDivide">÷</string>
 
-    <string-array name="thirdRow">
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>−</item>
-    </string-array>
+    <string name="button7">7</string>
+    <string name="button8">8</string>
+    <string name="button9">9</string>
+    <string name="buttonMultiply">×</string>
 
-    <string-array name="fourthRow">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>+</item>
-    </string-array>
+    <string name="button4">4</string>
+    <string name="button5">5</string>
+    <string name="button6">6</string>
+    <string name="buttonMinus">−</string>
 
-    <string-array name="fifthRow">
-        <item>0</item>
-        <item>.</item>
-        <item>⌫</item>
-        <item>=</item>
-    </string-array>
+    <string name="button1">1</string>
+    <string name="button2">2</string>
+    <string name="button3">3</string>
+    <string name="buttonPlus">+</string>
+
+    <string name="button0">0</string>
+    <string name="buttonDot">.</string>
+    <string name="buttonBackspace">Backspace</string>
+    <string name="buttonEquals">=</string>
 
     <string name="errorInput">Ошибка ввода данных</string>
 </resources>

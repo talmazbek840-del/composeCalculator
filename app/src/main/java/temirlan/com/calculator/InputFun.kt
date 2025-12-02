@@ -1,119 +1,149 @@
 package temirlan.com.calculator
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
 import kotlin.math.abs
 
-fun buttonClick(btnTxt: String, calculateTxt: String): String {
-    return when (btnTxt) {
-        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> inputDigit(
-            calculateTxt,
-            btnTxt.toInt()
-        )
+class CalculateViewModel() : ViewModel() {
+    var stateInput by mutableStateOf("")
 
-        "." -> inputDot(calculateTxt)
-        "+", "-", "×", "÷", "%" -> addOperation(btnTxt, calculateTxt)
-        "⌫" -> deleteOperation(calculateTxt)
-        "()" -> addBrackets(calculateTxt)
-        else -> calculateTxt
-    }
-}
+    var stateOutput by mutableStateOf("")
 
-private fun inputDigit(str: String, digit: Int): String {
-    return if (str.isNotEmpty() && str.last() == ')') {
-        "$str×$digit"
+    private var bracketsOpen: Boolean = false
+//    fun buttonClick(btnTxt: String, stateInput: String): String {
+//        return when (btnTxt) {
+//            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" -> inputDigit(
+//                stateInput,
+//                btnTxt.toInt()
+//            )
+//
+//            "." -> inputDot(stateInput)
+//            "+", "-", "×", "÷", "%" -> addOperation(btnTxt, stateInput)
+//            "⌫" -> deleteOperation(stateInput)
+//            "()" -> addBrackets(stateInput)
+//            else -> stateInput
+//        }
+//    }
 
-    } else {
-        str + "$digit"
-    }
-}
+    fun onAction(action: CalculateAction) {
+        println(stateInput)
+        when (action) {
+            is CalculateAction.InputNumber -> inputDigit(
+                stateInput,
+                action.number
+            )
 
-private fun inputDot(calculateTxt: String): String {
-    val numberLIST = calculateTxt.split("+", "-", "×", "÷", "%", "(", ")")
-    val lastPart = numberLIST.lastOrNull() ?: ""
-    return if (calculateTxt != "" && calculateTxt.last() != '.' && calculateTxt.last()
-            .isDigit() && !lastPart.contains(".")
-    ) {
-        "$calculateTxt."
-    } else calculateTxt
-}
+            is CalculateAction.Dot -> inputDot(stateInput)
+            is CalculateAction.Operation -> addOperation(action.operation.symbol, stateInput)
+            is CalculateAction.Delete -> deleteOperation()
+            is CalculateAction.Brackets -> addBrackets(stateInput)
+            is CalculateAction.Equal -> inputEqual(stateInput)
+            is CalculateAction.AC -> inputAC()
 
-private fun addOperation(op: String, calculateTxt: String): String {
-    if (calculateTxt != "" && canAddOperation(calculateTxt)) {
-        return calculateTxt + op
-    }
-    return calculateTxt
-}
-
-private fun addBrackets(calculateTxt: String): String {
-    when {
-
-        calculateTxt.isEmpty() || (isOperation(calculateTxt.last()) && !bracketsOpen && calculateTxt.last() != '(') -> {
-            bracketsOpen = true
-            return "$calculateTxt("
-
-        }
-
-        (calculateTxt.last().isDigit() || calculateTxt.last() == ')') && !bracketsOpen -> {
-            bracketsOpen = true
-            return "$calculateTxt×("
-
-        }
-
-        calculateTxt.last() == '.' && !bracketsOpen -> {
-            bracketsOpen = true
-            return calculateTxt + "0×("
-        }
-
-        calculateTxt.last().isDigit() && bracketsOpen && canCloseBracket(calculateTxt) -> {
-            bracketsOpen = false
-            return "$calculateTxt)"
-
-        }
-
-        (calculateTxt.last() == '.' && bracketsOpen) -> {
-            bracketsOpen = false
-            return calculateTxt + "0)"
-        }
-
-        else -> return calculateTxt
-    }
-}
-
-private fun canCloseBracket(str: String): Boolean {
-    if (str == "") return false
-    var counter = 0
-    for (i in str.length - 1 downTo 0) {
-        if (str[i] == '(') {
-            counter = i
         }
     }
-    val listToken = str.slice(counter + 1 until str.length).split("+", "-", "×", "÷", "%", "(", ")")
-    return listToken.size > 1
-}
 
-private fun isOperation(lastChar: Char): Boolean {
-    return lastChar == '+' || lastChar == '-' || lastChar == '×' || lastChar == '÷' || lastChar == '%'
-}
+    private fun inputAC() {
+        stateInput = ""
+        stateOutput = ""
+        bracketsOpen = false
+    }
 
-private fun canAddOperation(calculateTxt: String): Boolean {
-    return calculateTxt.isNotEmpty() && (calculateTxt.last()
-        .isDigit() || calculateTxt.last() == ')') && calculateTxt.last() != '('
-}
-
-private fun deleteOperation(calculateTxt: String): String {
-    return calculateTxt.dropLast(1)
-}
-
-fun inputEqual(calculateTxt: String): String {
-    return try {
-        val str = calculateTxt
-        val rpn = infixToRPN(str)
-        val result = evaluateRPN(rpn)
-        if (abs(result % 1.0) == 0.0) {
-            result.toInt().toString()
+    private fun inputDigit(str: String, digit: Int) {
+        stateInput = if (str.isNotEmpty() && str.last() == ')') {
+            "$str×$digit"
         } else {
-            result.toString()
+            str + "$digit"
         }
-    } catch (e: Exception) {
-        "Error"
+    }
+
+    private fun inputDot(stateInputParam: String) {
+        val numberLIST = stateInputParam.split("+", "-", "×", "÷", "%", "(", ")")
+        val lastPart = numberLIST.lastOrNull() ?: ""
+        if (stateInputParam != "" && stateInputParam.last() != '.' && stateInputParam.last()
+                .isDigit() && !lastPart.contains(".")
+        ) {
+            stateInput = "$stateInputParam."
+        }
+    }
+
+    private fun addOperation(op: String, stateInputParam: String) {
+        if (stateInputParam != "" && canAddOperation(stateInputParam)) {
+            stateInput = stateInputParam + op
+        }
+    }
+
+    private fun addBrackets(stateInputParam: String) {
+        when {
+            stateInputParam.isEmpty() || (isOperation(stateInputParam.last()) && !bracketsOpen && stateInputParam.last() != '(') -> {
+                bracketsOpen = true
+                stateInput = "$stateInputParam("
+            }
+
+            (stateInputParam.last()
+                .isDigit() || stateInputParam.last() == ')') && !bracketsOpen -> {
+                bracketsOpen = true
+                stateInput = "$stateInputParam×("
+            }
+
+            stateInputParam.last() == '.' && !bracketsOpen -> {
+                bracketsOpen = true
+                stateInput = stateInputParam + "0×("
+            }
+
+            stateInputParam.last()
+                .isDigit() && bracketsOpen && canCloseBracket(stateInputParam) -> {
+                bracketsOpen = false
+                stateInput = "$stateInputParam)"
+            }
+
+            (stateInputParam.last() == '.' && bracketsOpen) -> {
+                bracketsOpen = false
+                stateInput = stateInputParam + "0)"
+            }
+        }
+    }
+
+    private fun canCloseBracket(str: String): Boolean {
+        if (str == "") return false
+        var counter = 0
+        for (i in str.length - 1 downTo 0) {
+            if (str[i] == '(') {
+                counter = i
+            }
+        }
+        val listToken =
+            str.slice(counter + 1 until str.length).split("+", "-", "×", "÷", "%", "(", ")")
+        return listToken.size > 1
+    }
+
+    private fun isOperation(lastChar: Char): Boolean {
+        return lastChar == '+' || lastChar == '-' || lastChar == '×' || lastChar == '÷' || lastChar == '%'
+    }
+
+    private fun canAddOperation(stateInput: String): Boolean {
+        return stateInput.isNotEmpty() && (stateInput.last()
+            .isDigit() || stateInput.last() == ')') && stateInput.last() != '('
+    }
+
+    private fun deleteOperation() {
+        stateInput.dropLast(1)
+    }
+
+    private fun inputEqual(stateInput: String) {
+        try {
+            val str = stateInput
+            val rpn = infixToRPN(str)
+            val result = evaluateRPN(rpn)
+            stateOutput = if (abs(result % 1.0) == 0.0) {
+                result.toInt().toString()
+            } else {
+                result.toString()
+            }
+        } catch (e: Exception) {
+            stateOutput = "Error"
+        }
     }
 }
