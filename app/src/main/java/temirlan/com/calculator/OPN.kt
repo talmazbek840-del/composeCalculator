@@ -67,7 +67,7 @@ fun isOperator(c: Char) = c in listOf('+', '-', '×', '÷','%')
 
 fun precedence(c: Char): Int = when (c) {
     '+', '-' -> 1
-    '×','%'-> 2
+    '×','÷','%'-> 2
     else -> 0
 }
 

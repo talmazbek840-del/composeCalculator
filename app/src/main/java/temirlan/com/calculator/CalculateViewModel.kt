@@ -17,11 +17,13 @@ class CalculateViewModel() : ViewModel() {
                 stateInput,
                 action.number
             )
+
             is CalculateAction.Dot -> inputDot(stateInput)
             is CalculateAction.Operation -> addOperation(
                 action.operation.symbol,
                 stateInput
             )
+
             is CalculateAction.Delete -> deleteOperation()
             is CalculateAction.Brackets -> addBrackets(stateInput)
             is CalculateAction.Equal -> inputEqual(stateInput)
@@ -113,7 +115,7 @@ class CalculateViewModel() : ViewModel() {
     }
 
     private fun deleteOperation() {
-        stateInput=stateInput.dropLast(1)
+        stateInput = stateInput.dropLast(1)
     }
 
     private fun inputEqual(stateInput: String) {
