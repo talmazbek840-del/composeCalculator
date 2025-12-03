@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="paddingCalcBtn">2.dp</dimen>
+</resources>

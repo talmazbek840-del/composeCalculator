@@ -13,14 +13,9 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -29,11 +24,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import temirlan.com.calculator.ui.theme.MainTheme
 
@@ -44,8 +40,10 @@ fun CalculateScreen() {
     val configuration = LocalConfiguration.current
     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    Column(modifier = Modifier.background(
-        MainTheme.colors.BackgroundColor)) {
+    Column(modifier = Modifier
+        .background(
+            MainTheme.colors.BackgroundColor)
+        ) {
         Column(
             modifier = Modifier
                 .padding(2.dp, 10.dp)
@@ -54,14 +52,16 @@ fun CalculateScreen() {
                 .weight(4f)
         ) {
             CalculatorIO(
-                viewModel.stateInput, onValueChange = { viewModel.stateInput = it },
+                viewModel.stateInput,
                 Modifier.weight(1f),
-                colors = listOf(MainTheme.colors.BackgroundColor,MainTheme.colors.BtnMainTextColor)
+                MainTheme.colors.BackgroundColor,
+                MainTheme.colors.BtnMainTextColor
             )
             CalculatorIO(
-                viewModel.stateOutput, onValueChange = { viewModel.stateOutput = it },
+                viewModel.stateOutput,
                 Modifier.weight(1f),
-                colors = listOf(MainTheme.colors.BackgroundColor, MainTheme.colors.BtnMainTextColor)
+                MainTheme.colors.BackgroundColor,
+                MainTheme.colors.BtnMainTextColor
             )
         }
         Column(
@@ -373,18 +373,18 @@ fun CalculateScreen() {
     }
 }
 
-
 @Composable
 fun CalculatorButton(
     label: String,
     isLandScape: Boolean,
     modifier: Modifier ,
-            onClick: () -> Unit
+    onClick: () -> Unit
 ) {
     Box(
-        modifier = modifier.fillMaxHeight()
-            .clickable { onClick() }
+        modifier = modifier
             .clip(CircleShape)
+            .fillMaxHeight()
+            .clickable { onClick() }
             .background ( changeColor(label)[0]),
         contentAlignment = Alignment.Center
 
@@ -402,54 +402,33 @@ fun CalculatorButton(
 @Composable
 fun CalculatorIO(
     value: String,
-    onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    colors:List <Color>
+    backgroundColor: Color,
+    textColor: Color
 ) {
     val scrollState = rememberScrollState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(value) {
         coroutineScope.launch {
-            kotlinx.coroutines.delay(50)
-            scrollState.animateScrollTo(
-                value = scrollState.maxValue,
-                animationSpec = androidx.compose.animation.core.tween(
-                    durationMillis = 200,
-                    easing = androidx.compose.animation.core.FastOutSlowInEasing
-                )
-            )
+            delay(50)
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
-    CompositionLocalProvider(LocalContentColor provides colors[1].copy(alpha = 1f)) {
-        TextField(
-            value = value,
-            onValueChange = { value ->
-                onValueChange(value)
-            },
-            modifier = modifier
-                .fillMaxWidth()
-                .heightIn(min = 60.dp, max = 150.dp)
-                .verticalScroll(scrollState),
-            textStyle = MainTheme.typography.displayMedium,
-            keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),  // Нет клавиатуры
-            enabled = true,
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = colors[0],
-                unfocusedTextColor = colors[1]
-            ),
-            placeholder = {
-                Text(
-                    text = "0",
-                    style = MainTheme.typography.displayMedium,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            singleLine = false,
-            maxLines = Int.MAX_VALUE
-        )
-    }
+    Text(
+        text = value.ifEmpty { "0" },
+        style = MainTheme.typography.displayMedium.copy(
+            textAlign = TextAlign.End
+        ),
+        color = textColor,
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 60.dp, max = 150.dp)
+            .background(backgroundColor)
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+    )
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES,device = Devices.PIXEL_4, showSystemUi = true)
